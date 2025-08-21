@@ -1,0 +1,41 @@
+version: "3.9"
+services:
+  users:
+    build: ./users
+    ports:
+      - "5000:5000"
+    command: uvicorn main:app --host 0.0.0.0 --port 5000 --reload
+
+  orders:
+    build: ./orders
+    ports:
+      - "5001:5001"
+    command: uvicorn main:app --host 0.0.0.0 --port 5001 --reload
+
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - users
+      - orders
+      - mongo
+    environment:
+      CONFIG_DB_URL: mongodb://mongo:27017
+      CONFIG_DB_NAME: backend_config
+      CONFIG_DB_COLLECTION: configs
+    command: uvicorn main:app --host 0.0.0.0 --port 8080 --reload
+
+  mongo:
+    image: mongo:6.0
+    container_name: mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: backend_config
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
