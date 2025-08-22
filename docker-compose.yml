@@ -20,10 +20,8 @@ services:
       - users
       - orders
       - mongo
-    environment:
-      CONFIG_DB_URL: mongodb://mongo:27017
-      CONFIG_DB_NAME: backend_config
-      CONFIG_DB_COLLECTION: configs
+    env_file: 
+      - ./backend/.env
     command: uvicorn main:app --host 0.0.0.0 --port 8080 --reload
 
   mongo:

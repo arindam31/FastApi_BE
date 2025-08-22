@@ -35,8 +35,14 @@ This project runs **3 microservices**:
 - [Docker](https://www.docker.com/get-started) and [Docker Compose](https://docs.docker.com/compose/) installed  
 - Python 3.12+ (for running CLI tools)  
 - MongoDB is containerized via Docker (no local installation required)  
+- A .env file must exist inside backend folder (imagine multi machines for staging, demo or testing) with the following values
+  
+   - CONFIG_DB_URL=mongodb://mongo:27017
+   - CONFIG_DB_NAME=backend_config
+   - CONFIG_DB_COLLECTION=configs
+   - ENV=dev
+    
 
----
 
 ## Installation
 
