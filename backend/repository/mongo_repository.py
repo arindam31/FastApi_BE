@@ -1,5 +1,6 @@
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from pymongo import MongoClient, ReturnDocument
+from pymongo.database import Database
 from pymongo.errors import DuplicateKeyError
 
 
@@ -17,9 +18,16 @@ class MongoRepoClient:
         """Fetch one document by env"""
         doc = db[collection_name].find_one({"env": env})
         return doc
+    
+    def get_all_json_documents(
+        self, collection_name: str, db: MongoClient
+    ) -> List[Dict[str, Any]]:
+        """Fetch all documents from a collection"""
+        docs = db[collection_name].find({})
+        return [doc for doc in docs]
 
     def create_json_document(
-        self, collection_name: str, db: MongoClient, document: Dict[str, Any]
+        self, collection_name: str, db: Database, document: Dict[str, Any]
     ) -> bool:
         """Insert a new config document.
         Returns True if inserted, False if env already exists.
@@ -36,7 +44,7 @@ class MongoRepoClient:
             return False
 
     def update_json_document(
-        self, collection_name: str, db: MongoClient, env: str, updates: Dict[str, Any]
+        self, collection_name: str, db: Database, env: str, updates: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
         """Update an existing config document for the given env.
         Returns the updated document, or None if not found.
