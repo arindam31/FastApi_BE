@@ -1,7 +1,10 @@
+import json
 import typer
 import subprocess
 import getpass
 from pathlib import Path
+
+# Local imports
 from config_loader import ConfigLoader
 
 app = typer.Typer()
@@ -16,7 +19,11 @@ USERS = {
 @app.command()
 def deploy(env: str):
     """Deploy backend to specified environment"""
+    
     allowed_envs = ["dev", "staging", "prod"]
+    if env not in allowed_envs:
+        typer.echo(f"Invalid environment: {env}")
+        raise typer.Exit()
 
     # Check user credentials
     username = input("Username: ")
@@ -27,10 +34,6 @@ def deploy(env: str):
         typer.echo("Invalid username or password")
         raise typer.Exit()
 
-    if env not in allowed_envs:
-        typer.echo(f"Invalid environment: {env}")
-        raise typer.Exit()
-    
     # ABAC check
     if env not in user["allowed_envs"]:
         typer.echo(f"Permission denied: {username} cannot deploy to {env}")
