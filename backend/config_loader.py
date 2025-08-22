@@ -1,24 +1,33 @@
 import os
 import logging
-from pydantic import BaseSettings
-from pymongo.database import Database
-from typing import Optional, Dict, Any
+from pydantic_settings import BaseSettings
+from pydantic import ValidationError
+from typing import Optional
 
 # local imports
-from backend.repository.mongo_repository import MongoRepoClient
-from backend.protocols import AbstractMongoRepository
-from backend.models import Config
+from repository.mongo_repository import MongoRepoClient
+from protocols import AbstractMongoRepository
+from models import Config
 
 logger = logging.getLogger(__name__)
+
+
+class EnvSettings(BaseSettings):
+    env: str = "dev"
+
+    class Config:
+        env_file = ".env"
 
 
 class ConfigLoader:
     _config: Optional[Config] = None
     _repo: Optional[AbstractMongoRepository] = None
-
+    doc = None
 
     @classmethod
-    def load(cls, repo: Optional[AbstractMongoRepository] = None) -> Config:
+    def load(
+        cls, repo: Optional[AbstractMongoRepository] = None, env: Optional[str] = None
+    ) -> Config:
         """Load config from MongoDB, fallback to .env"""
         # Use injected repo or default MongoRepoClient
         cls._repo = repo or MongoRepoClient(
@@ -26,7 +35,7 @@ class ConfigLoader:
         )
 
         # Load base settings for env fallback
-        base_settings = BaseSettings(_env_file=".env")
+        base_settings = EnvSettings()
 
         db_name = os.getenv("CONFIG_DB_NAME", "backend_config")
         collection_name = os.getenv("CONFIG_DB_COLLECTION", "configs")
@@ -34,30 +43,24 @@ class ConfigLoader:
 
         try:
             # Connect to database
-            db: Database = cls._repo.connect_instance(db_name)
+            db = cls._repo.connect_instance(db_name)
 
             # Fetch document
-            doc: Optional[Dict[str, Any]] = cls._repo.get_single_json_document(
-                collection_name=collection_name,
-                db=db,
-                env=env
+            doc = cls._repo.get_single_json_document(
+                collection_name=collection_name, db=db, env=env
             )
-
-            if doc:
-                cls._config = Config(**doc)
-                logger.info(f"Loaded config from MongoDB for env={doc.get('env', env)}")
-                return cls._config
-            else:
-                logger.warning(f"No config found in MongoDB for env={env}")
-
         except Exception as e:
             logger.error(f"Failed to load config from MongoDB: {e}")
-
+        
+        if not doc:
+            logger.warning(f"No config found in MongoDB for env={env}")
+        
         # fallback to .env
         cls._config = Config(
             env=base_settings.env,
             users_url=os.getenv("USERS_URL", "http://users:5000"),
             orders_url=os.getenv("ORDERS_URL", "http://orders:5001"),
+            server_ip=os.getenv("SERVER_IP", "127.0.0.1"),  # must add fallback
             logging_level=os.getenv("LOGGING_LEVEL", "INFO"),
         )
         logger.info("Loaded config from .env fallback")

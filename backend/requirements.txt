@@ -3,3 +3,4 @@ uvicorn[standard]
 pymongo[srv]
 pydantic
 httpx
+typer
