@@ -1,7 +1,6 @@
 import os
 import logging
 from pydantic_settings import BaseSettings
-from pydantic import ValidationError
 from typing import Optional
 
 # local imports

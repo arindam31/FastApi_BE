@@ -3,7 +3,7 @@ import httpx
 import logging
 
 from fastapi import FastAPI
-from backend.config_loader import ConfigLoader
+from config_loader import ConfigLoader
 
 
 logger = logging.getLogger(__name__)

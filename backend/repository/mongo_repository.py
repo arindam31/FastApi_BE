@@ -13,7 +13,7 @@ class MongoRepoClient:
         return db
 
     def get_single_json_document(
-        self, collection_name: str, db: MongoClient, env: str
+        self, collection_name: str, db: Database, env: str
     ) -> Optional[Dict[str, Any]]:
         """Fetch one document by env"""
         doc = db[collection_name].find_one({"env": env})
