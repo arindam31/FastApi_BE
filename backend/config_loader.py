@@ -13,9 +13,15 @@ logger = logging.getLogger(__name__)
 
 class EnvSettings(BaseSettings):
     env: str = "dev"
+    users_url: str = "http://users:5000"
+    orders_url: str = "http://orders:5001"
+    server_ip: str = "127.0.0.1"
+    logging_level: str = "INFO"
+
 
     class Config:
-        env_file = ".env"
+        env_file = "./backend/.env"
+        extra = "ignore"
 
 
 class ConfigLoader:
@@ -51,19 +57,24 @@ class ConfigLoader:
         except Exception as e:
             logger.error(f"Failed to load config from MongoDB: {e}")
         
-        if not doc:
-            logger.warning(f"No config found in MongoDB for env={env}")
         
-        # fallback to .env
-        cls._config = Config(
-            env=base_settings.env,
-            users_url=os.getenv("USERS_URL", "http://users:5000"),
-            orders_url=os.getenv("ORDERS_URL", "http://orders:5001"),
-            server_ip=os.getenv("SERVER_IP", "127.0.0.1"),  # must add fallback
-            logging_level=os.getenv("LOGGING_LEVEL", "INFO"),
-        )
-        logger.info("Loaded config from .env fallback")
+        if doc and isinstance(doc, dict):
+            doc.pop("_id", None)  # remove ObjectId if present
+            logger.info(f"Loaded config from MongoDB for env={env}")
+            cls._config = Config(**doc)
+        else:
+            logger.warning(f"No config found in MongoDB for env={env}, using .env fallback")
+            cls._config = Config(
+                env=base_settings.env,
+                users_url=os.getenv("USERS_URL", "http://users:5000"),
+                orders_url=os.getenv("ORDERS_URL", "http://orders:5001"),
+                server_ip=os.getenv("SERVER_IP", "127.0.0.1"),
+                logging_level=os.getenv("LOGGING_LEVEL", "INFO"),
+            )
+            logger.info("Loaded config from .env fallback")
+
         return cls._config
+    
 
     @classmethod
     def get_config(cls) -> Config:
