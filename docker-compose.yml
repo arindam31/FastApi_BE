@@ -34,8 +34,11 @@ services:
       - "27017:27017"
     environment:
       MONGO_INITDB_DATABASE: backend_config
+      MONGO_INITDB_LOGLEVEL: 1  # 0=INFO, 1=WARNING, 2=ERROR, 3=SEVERE
+    command: ["--quiet", "--logpath", "/data/log/mongod.log"]
     volumes:
       - mongo_data:/data/db
+      - ./mongo_logs:/data/log  # logs redirected here
 
 volumes:
   mongo_data:

@@ -70,3 +70,16 @@ Created new config for env=demo
   }
 }
 ```
+
+### **For updating a field**:
+```powershell
+(.venv) PS C:\Projects\Infra_Microservice_Demo\FastApi_BE\backend> python -m cli.manage_envs edit-env --env dev --field servep_ip --value 127.0.0.1
+Updated env=dev
+{
+  "env": "dev",
+  "users_url": "http://users:5000",
+  "orders_url": "http://orders:5001",
+  "logging_level": "INFO",
+  "servep_ip": "127.0.0.1"
+}
+```

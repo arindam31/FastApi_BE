@@ -7,5 +7,5 @@ class AbstractMongoRepository(Protocol):
     def connect_instance(self, db_name: str) -> Database: ...
 
     def get_single_json_document(
-        self, collection_name: str, db: MongoClient, env: str
+        self, collection_name: str, db: Database, env: str
     ) -> Optional[Dict[str, Any]]: ...
