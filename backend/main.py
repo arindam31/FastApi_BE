@@ -14,7 +14,7 @@ app = FastAPI()
 # Load config once at startup
 config = ConfigLoader.load()
 
-@app.get("/api/profile/{user_id}")
+@app.get("/profile/{user_id}")
 async def get_profile(user_id: int):
     async with httpx.AsyncClient() as client:
         try:
